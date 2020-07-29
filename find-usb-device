@@ -1,0 +1,21 @@
+#!/bin/bash
+trim() {
+    local var="$*"
+    var="${var#"${var%%[![:space:]]*}"}"
+    var="${var%"${var##*[![:space:]]}"}"   
+    printf '%s' "$var"
+}
+g=$(echo -n $1 | grep -Eo "[[:alnum:]]{4}:[[:alnum:]]{4}" | tr -d '\n' | tr -d '\r')
+if [ $# -eq 0 ];then
+  echo "Usage: `basename $0` idVendor:idProduct"
+  exit 1
+fi
+a=(`echo -n $g | sed 's/:/\n/g'`)
+
+
+for X in /sys/bus/usb/devices/*; do 
+    if [ "${a[0]}" == "$(cat "$X/idVendor" 2>/dev/null)" -a "${a[1]}" == "$(cat "$X/idProduct" 2>/dev/null)" ]
+    then
+        echo "$X"
+    fi
+done

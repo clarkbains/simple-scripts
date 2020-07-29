@@ -1,0 +1,20 @@
+#!/bin/sh
+
+originalIfs=$IFS 
+IFS=$'\n'
+options=(`grep '^Exec' $1 | sed 's/^Exec=//' | sed 's/%.//'`)
+if [[ ${#options[@]} > 1 ]]; then
+    for (( i=0; i<${#options[@]}; i++ )); do
+        echo "[$i] - ${options[$i]}"
+    done
+    while [[ 1 ]]; do
+        read -p 'Command: ' idexToRun
+        if [[ $idexToRun -gt -1 ]] && [[ $idexToRun -lt ${#options[@]} ]] ; then
+            eval "${options[$idexToRun]} &"
+            break
+        fi
+    done
+else
+    eval "${options[0]} &"
+fi
+IFS=$originalIfs 

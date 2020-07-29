@@ -1,0 +1,38 @@
+
+#!/usr/bin/env python3
+import sys, argparse
+parser = argparse.ArgumentParser(description='Deparametrize a sql query')
+parser.add_argument('--param-seperator', help='Seperator for params', default=",", required=False)
+parser.add_argument('--query-placeholder', help='Placeholder used in the query', default="?", required=False)
+args = parser.parse_args()
+def readFromStdin(prompt):
+    print(prompt)
+    print ("(Enter 2 newlines to exit)")
+    retval = ""
+    terminators = 0
+    for line in sys.stdin:
+        if line == "\n":
+            terminators +=1
+        else:
+            terminators = 0
+        retval += line
+        if terminators == 2:
+            retval = retval[:-3]
+            break
+    return retval
+
+query = readFromStdin("Enter Parametrized Query")
+params = readFromStdin("Enter Params")
+paramParts = params.split(vars(args)["param_seperator"])
+queryParts = query.split(vars(args)["query_placeholder"])
+print ("Reconstructed Query:\n\n")
+for i in range(len(queryParts)-1):
+    print(queryParts[i], end="")
+    sqlString = "\"" + paramParts[i] + "\""
+    try: 
+       int(paramParts[i])
+       sqlString = paramParts[i]
+    except ValueError:
+        pass
+    print (sqlString, end="")
+print()
